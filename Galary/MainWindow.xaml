@@ -1,0 +1,393 @@
+﻿<Window x:Class="Galary.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:g="clr-namespace:Galary"
+        Title="Galary" Width="1320" Height="840" MinWidth="820" MinHeight="540"
+        Background="Transparent" Foreground="{DynamicResource Ink}"
+        FontFamily="Segoe UI Variable Display, Segoe UI" UseLayoutRounding="True"
+        PreviewKeyDown="Win_KeyDown" AllowDrop="True" Drop="Win_Drop" PreviewDragOver="Win_Over">
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="56" GlassFrameThickness="-1" ResizeBorderThickness="6" CornerRadius="0" UseAeroCaptionButtons="False"/>
+    </WindowChrome.WindowChrome>
+
+    <Window.Resources>
+        <!-- sidebar nav row -->
+        <Style x:Key="NavBtn" TargetType="Button">
+            <Setter Property="Foreground" Value="{DynamicResource Ink}"/><Setter Property="Cursor" Value="Hand"/><Setter Property="Focusable" Value="False"/>
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Button">
+                <Border x:Name="Bd" Background="Transparent" CornerRadius="12">
+                    <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center" Margin="16,0,0,0"/>
+                </Border>
+                <ControlTemplate.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bd" Property="Background" Value="{DynamicResource W12}"/></Trigger>
+                </ControlTemplate.Triggers>
+            </ControlTemplate></Setter.Value></Setter>
+        </Style>
+
+        <!-- sidebar library action -->
+        <Style x:Key="SideBtn" TargetType="Button">
+            <Setter Property="Foreground" Value="{DynamicResource Dim}"/><Setter Property="Cursor" Value="Hand"/><Setter Property="Focusable" Value="False"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Button">
+                <Border x:Name="Bd" Background="Transparent" CornerRadius="12">
+                    <StackPanel Orientation="Horizontal" Margin="16,0,0,0" VerticalAlignment="Center">
+                        <TextBlock x:Name="Gl" Text="{TemplateBinding Tag}" FontFamily="{StaticResource Icons}" FontSize="15" Width="22" VerticalAlignment="Center"/>
+                        <ContentPresenter VerticalAlignment="Center" Margin="10,0,0,0"/>
+                    </StackPanel>
+                </Border>
+                <ControlTemplate.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter TargetName="Bd" Property="Background" Value="{DynamicResource W12}"/>
+                        <Setter Property="Foreground" Value="{DynamicResource Ink}"/>
+                    </Trigger>
+                </ControlTemplate.Triggers>
+            </ControlTemplate></Setter.Value></Setter>
+        </Style>
+
+        <!-- pill chip in the floating bar -->
+        <Style x:Key="Chip" TargetType="Button">
+            <Setter Property="Foreground" Value="{DynamicResource Ink}"/><Setter Property="Background" Value="{DynamicResource W14}"/>
+            <Setter Property="Cursor" Value="Hand"/><Setter Property="Focusable" Value="False"/><Setter Property="Height" Value="34"/>
+            <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Button">
+                <Border x:Name="Bd" CornerRadius="17" Background="{TemplateBinding Background}" Padding="13,0">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="{TemplateBinding Tag}" FontFamily="{StaticResource Icons}" FontSize="13" Foreground="{TemplateBinding Foreground}" VerticalAlignment="Center"/>
+                        <ContentPresenter Margin="7,0,0,0" TextBlock.Foreground="{TemplateBinding Foreground}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+                <ControlTemplate.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bd" Property="Opacity" Value="0.82"/></Trigger>
+                </ControlTemplate.Triggers>
+            </ControlTemplate></Setter.Value></Setter>
+        </Style>
+
+        <!-- macOS-style traffic light -->
+        <Style x:Key="Light" TargetType="Button">
+            <Setter Property="Width" Value="14"/><Setter Property="Height" Value="14"/><Setter Property="Margin" Value="0,0,8,0"/>
+            <Setter Property="Cursor" Value="Hand"/><Setter Property="Focusable" Value="False"/>
+            <Setter Property="WindowChrome.IsHitTestVisibleInChrome" Value="True"/>
+            <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Button">
+                <Grid Background="Transparent">
+                    <Ellipse Fill="{TemplateBinding Background}" Stroke="#33000000" StrokeThickness="0.5"/>
+                    <TextBlock x:Name="G" Text="{TemplateBinding Content}" FontFamily="{StaticResource Icons}" FontSize="7.5" FontWeight="Bold"
+                               Foreground="#B3000000" Opacity="0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Grid>
+                <ControlTemplate.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="G" Property="Opacity" Value="1"/></Trigger>
+                </ControlTemplate.Triggers>
+            </ControlTemplate></Setter.Value></Setter>
+        </Style>
+
+        <Style TargetType="ListBoxItem">
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ListBoxItem"><ContentPresenter/></ControlTemplate></Setter.Value></Setter>
+        </Style>
+
+        <DataTemplate DataType="{x:Type g:HeaderRow}">
+            <StackPanel Orientation="Horizontal" Margin="24,40,24,14">
+                <TextBlock Text="{Binding Title}" FontSize="19" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" MaxWidth="620"/>
+                <TextBlock Text="{Binding Sub}" Foreground="{DynamicResource Dim}" FontSize="13" Margin="12,0,0,1" VerticalAlignment="Bottom" TextTrimming="CharacterEllipsis" MaxWidth="520"/>
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type g:TileRow}">
+            <ItemsControl ItemsSource="{Binding Tiles}" Margin="20,0,18,0" Focusable="False">
+                <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border x:Name="Tile" Width="{Binding TileW}" Height="{Binding TileH}"
+                                Margin="2" CornerRadius="12" Background="{DynamicResource Surface}" Cursor="Hand"
+                                RenderTransformOrigin="0.5,0.5" Opacity="0"
+                                Loaded="Tile_Loaded" Unloaded="Tile_Unloaded" MouseEnter="Tile_Enter" MouseLeave="Tile_Leave"
+                                MouseLeftButtonDown="Tile_Press" MouseLeftButtonUp="Tile_Click" MouseRightButtonUp="Tile_Menu" MouseDown="Tile_Down">
+                            <Border.RenderTransform><ScaleTransform ScaleX="0.94" ScaleY="0.94"/></Border.RenderTransform>
+                            <Grid>
+                                <TextBlock Text="{Binding Glyph}" FontFamily="{StaticResource Icons}" FontSize="34" Opacity="0.3"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <Border CornerRadius="12"><Border.Background><ImageBrush ImageSource="{Binding Thumb}" Stretch="UniformToFill"/></Border.Background></Border>
+
+                                <!-- audio / docs have no picture: name is always visible -->
+                                <Border VerticalAlignment="Bottom" CornerRadius="0,0,12,12" Padding="12,22,12,10"
+                                        Visibility="{Binding IsCaption, Converter={StaticResource B2V}}">
+                                    <Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                        <GradientStop Color="#00000000" Offset="0"/><GradientStop Color="#B8000000" Offset="1"/></LinearGradientBrush></Border.Background>
+                                    <TextBlock Text="{Binding Name}" FontSize="12.5" Foreground="White" TextTrimming="CharacterEllipsis"/>
+                                </Border>
+
+                                <!-- hover scrim: name for pictures and videos -->
+                                <Border x:Name="Over" Opacity="0" CornerRadius="12" IsHitTestVisible="False">
+                                    <Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                        <GradientStop Color="#00000000" Offset="0.5"/><GradientStop Color="#CC000000" Offset="1"/></LinearGradientBrush></Border.Background>
+                                    <TextBlock Text="{Binding Name}" FontSize="12.5" Foreground="White" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="12,0,44,11"
+                                               TextTrimming="CharacterEllipsis" Visibility="{Binding IsMedia, Converter={StaticResource B2V}}"/>
+                                </Border>
+
+                                <Border HorizontalAlignment="Right" VerticalAlignment="Top" Margin="9" Width="26" Height="26" CornerRadius="13"
+                                        Background="#99000000" Visibility="{Binding IsVideo, Converter={StaticResource B2V}}">
+                                    <TextBlock Text="&#xE768;" FontFamily="{StaticResource Icons}" Foreground="White" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+
+                                <TextBlock x:Name="HeartOff" Text="&#xEB51;" FontFamily="{StaticResource Icons}" Foreground="White" FontSize="17" Opacity="0"
+                                           HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,11,10" Background="Transparent"
+                                           MouseLeftButtonUp="Tile_Fav"/>
+                                <TextBlock Text="&#xEB52;" FontFamily="{StaticResource Icons}" FontSize="17" Foreground="#FF5C7A"
+                                           HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,11,10" Background="Transparent"
+                                           Visibility="{Binding Fav, Converter={StaticResource B2V}}" MouseLeftButtonUp="Tile_Fav"/>
+
+                                <Border CornerRadius="12" BorderBrush="{StaticResource Accent}" BorderThickness="3" Background="#26000000" IsHitTestVisible="False"
+                                        Visibility="{Binding Selected, Converter={StaticResource B2V}}"/>
+                                <Grid Tag="Chk" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="9" Width="26" Height="26" Background="Transparent"
+                                      Opacity="{Binding CheckOpacity}" MouseLeftButtonUp="Tile_Check">
+                                    <Ellipse Stroke="White" StrokeThickness="2" Fill="#55000000"/>
+                                    <Ellipse Fill="{StaticResource Accent}" Visibility="{Binding Selected, Converter={StaticResource B2V}}"/>
+                                    <TextBlock Text="&#xE73E;" FontFamily="{StaticResource Icons}" FontSize="13" Foreground="{StaticResource OnAccent}"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding Selected, Converter={StaticResource B2V}}"/>
+                                </Grid>
+                            </Grid>
+                        </Border>
+                        <DataTemplate.Triggers>
+                            <Trigger SourceName="Tile" Property="IsMouseOver" Value="True">
+                                <Trigger.EnterActions><BeginStoryboard><Storyboard>
+                                    <DoubleAnimation Storyboard.TargetName="Over" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.2"/>
+                                    <DoubleAnimation Storyboard.TargetName="HeartOff" Storyboard.TargetProperty="Opacity" To="0.9" Duration="0:0:0.2"/>
+                                </Storyboard></BeginStoryboard></Trigger.EnterActions>
+                                <Trigger.ExitActions><BeginStoryboard><Storyboard>
+                                    <DoubleAnimation Storyboard.TargetName="Over" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.26"/>
+                                    <DoubleAnimation Storyboard.TargetName="HeartOff" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.26"/>
+                                </Storyboard></BeginStoryboard></Trigger.ExitActions>
+                            </Trigger>
+                        </DataTemplate.Triggers>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions><ColumnDefinition Width="248"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+        <Image x:Name="BgImg" Grid.ColumnSpan="2" Stretch="UniformToFill" IsHitTestVisible="False"/>
+        <Border x:Name="BgTint" Grid.ColumnSpan="2" Background="#CC08090D" IsHitTestVisible="False"/>
+
+        <!-- sidebar -->
+        <Border Grid.Column="0" Background="{DynamicResource SideBg}" BorderBrush="{DynamicResource Hairline}" BorderThickness="0,0,1,0">
+            <Grid Margin="14,0">
+                <Grid.RowDefinitions><RowDefinition Height="56"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                <StackPanel Orientation="Horizontal" Margin="6,0,0,0" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,14,0">
+                        <Button Style="{StaticResource Light}" Background="#FF5F57" Content="&#xE711;" Click="WinClose_Click" ToolTip="Close"/>
+                        <Button Style="{StaticResource Light}" Background="#FEBC2E" Content="&#xE921;" Click="WinMin_Click" ToolTip="Minimize"/>
+                        <Button Style="{StaticResource Light}" Background="#28C840" Content="&#xE922;" Click="WinMax_Click" ToolTip="Maximize"/>
+                    </StackPanel>
+                    <Border Width="26" Height="26" CornerRadius="8" Background="{StaticResource Accent}">
+                        <Ellipse Width="10" Height="10" Fill="{StaticResource OnAccent}"/>
+                    </Border>
+                    <TextBlock Text="Galary" FontSize="18" FontWeight="SemiBold" Margin="11,0,0,0" VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <Grid Grid.Row="1" Margin="0,14,0,0">
+                    <Border x:Name="Ind" Height="44" VerticalAlignment="Top" CornerRadius="12" Background="{DynamicResource W26}">
+                        <Border.RenderTransform><TranslateTransform x:Name="IndT"/></Border.RenderTransform>
+                    </Border>
+                    <StackPanel x:Name="NavItems"/>
+                </Grid>
+
+                <TextBlock Grid.Row="2" Text="Library" Foreground="{DynamicResource Dim}" FontSize="12.5" Margin="18,26,0,8"/>
+                <StackPanel Grid.Row="3" VerticalAlignment="Top">
+                    <Button Style="{StaticResource SideBtn}" Tag="&#xE710;" Content="Add folder" Click="AddFolder_Click"/>
+                    <Button Style="{StaticResource SideBtn}" Tag="&#xE71B;" Content="Play network stream" Click="Url_Click"/>
+                    <Button Style="{StaticResource SideBtn}" Tag="&#xE72C;" Content="Rescan drives" Click="Rescan_Click"/>
+                    <Button Style="{StaticResource SideBtn}" Tag="&#xE790;" Content="Background" Click="Bg_Click"/>
+                    <Button Style="{StaticResource SideBtn}" Tag="&#xE71C;" Content="Exclude folders…" Click="Ex_Click" ToolTip="Skip folders whose name contains words like cache or thumbnail"/>
+                    <Button x:Name="SmartBtn" Style="{StaticResource SideBtn}" Tag="&#xE7B3;" Content="Hide dummy media" Click="Smart_Click" ToolTip="Hides app, game and system media (icons, sprites, UI sounds)"/>
+                    <Button Style="{StaticResource SideBtn}" Tag="&#xE90F;" Content="Tools" Click="Tools_Click" ToolTip="Duplicates, accent color, saved searches, shortcuts"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- main -->
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions><RowDefinition Height="0"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+
+            <Grid x:Name="Head" Height="96" Grid.Row="0" Grid.RowSpan="2" VerticalAlignment="Top" Panel.ZIndex="5" Margin="0,0,26,0" ClipToBounds="True">
+                <StackPanel VerticalAlignment="Center" Margin="26,10,0,0">
+                    <TextBlock x:Name="Title" Text="Gallery" FontSize="32" FontWeight="Light"/>
+                    <TextBlock x:Name="Sub" Foreground="{DynamicResource Dim}" FontSize="13" Margin="2,2,0,0"/>
+                </StackPanel>
+            </Grid>
+            <Border x:Name="ScanBar" Height="2" Grid.Row="0" Grid.RowSpan="2" Margin="0,94,0,0" Panel.ZIndex="5" VerticalAlignment="Top" ClipToBounds="True" Visibility="Collapsed">
+                <Border Width="160" HorizontalAlignment="Left" CornerRadius="1" Background="{StaticResource Accent}">
+                    <Border.RenderTransform><TranslateTransform x:Name="ScanX"/></Border.RenderTransform>
+                </Border>
+            </Border>
+
+            <ListBox x:Name="List" Grid.Row="1" Background="Transparent" BorderThickness="0" HorizontalContentAlignment="Stretch"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.CanContentScroll="True"
+                     VirtualizingPanel.ScrollUnit="Pixel" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Standard"
+                     PreviewMouseWheel="List_Wheel" PreviewMouseLeftButtonDown="List_Down" SizeChanged="List_Size" ScrollViewer.ScrollChanged="List_Scrolled">
+                <ListBox.Template>
+                    <ControlTemplate TargetType="ListBox">
+                        <ScrollViewer Focusable="False" Padding="0,0,0,120" CanContentScroll="True">
+                            <ItemsPresenter Margin="0,96,0,0"/>
+                        </ScrollViewer>
+                    </ControlTemplate>
+                </ListBox.Template>
+            </ListBox>
+
+            <StackPanel x:Name="Empty" Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="Collapsed" IsHitTestVisible="False">
+                <TextBlock Text="&#xEB9F;" FontFamily="{StaticResource Icons}" FontSize="52" Opacity="0.3" HorizontalAlignment="Center"/>
+                <TextBlock Text="No media here" FontSize="18" Margin="0,14,0,2" HorizontalAlignment="Center"/>
+                <TextBlock Text="Try another tab, or add a folder from the sidebar." Foreground="{DynamicResource Dim}" FontSize="13" HorizontalAlignment="Center"/>
+            </StackPanel>
+
+            <!-- fade so tiles slide cleanly under the floating bar -->
+            <Border Grid.Row="1" Height="150" VerticalAlignment="Bottom" IsHitTestVisible="False">
+                <Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                    <GradientStop Color="{DynamicResource FadeC0}" Offset="0"/><GradientStop Color="{DynamicResource FadeC1}" Offset="1"/></LinearGradientBrush></Border.Background>
+            </Border>
+
+            <!-- floating glass bar -->
+            <Border x:Name="Nav" Grid.Row="1" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,26" CornerRadius="28"
+                    Background="{DynamicResource Panel}" BorderBrush="{DynamicResource W26}" BorderThickness="1" Padding="8" MinWidth="560">
+                <Border.Effect><DropShadowEffect BlurRadius="40" ShadowDepth="10" Opacity="0.55"/></Border.Effect>
+                <Grid Height="40">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <Grid Margin="10,0,8,0">
+                        <TextBlock Text="&#xE721;" FontFamily="{StaticResource Icons}" FontSize="15" Foreground="{DynamicResource Dim}" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="SearchHint" Text="Search  ·  try kind:video  size&gt;100mb  date:week" Foreground="{DynamicResource Dim}" FontSize="14.5" VerticalAlignment="Center" Margin="28,0,0,0" IsHitTestVisible="False"/>
+                        <TextBox x:Name="Search" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource Ink}" CaretBrush="{StaticResource Accent}" SelectionBrush="{StaticResource Accent}"
+                                 VerticalAlignment="Center" Margin="26,0,0,0" FontSize="14.5" TextChanged="Search_Changed"/>
+                    </Grid>
+                    <Button x:Name="AlbumsBtn" Grid.Column="1" Style="{StaticResource Chip}" Tag="&#xE8B7;" Content="Folders" Margin="0,0,6,0" Click="Albums_Click" ToolTip="Group by folder"/>
+                    <Button x:Name="SortBtn" Grid.Column="2" Style="{StaticResource Chip}" Tag="&#xE8CB;" Content="Sort" Click="Sort_Click" ToolTip="Sort &amp; organize"/>
+                </Grid>
+            </Border>
+
+            <!-- selection bar (replaces the search bar while tiles are selected) -->
+            <Border x:Name="SelBar" Grid.Row="1" Visibility="Collapsed" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,26" CornerRadius="28"
+                    Background="{DynamicResource Panel}" BorderBrush="{DynamicResource W26}" BorderThickness="1" Padding="8" MinWidth="560">
+                <Border.RenderTransform><TranslateTransform x:Name="SelT"/></Border.RenderTransform>
+                <Border.Effect><DropShadowEffect BlurRadius="40" ShadowDepth="10" Opacity="0.55"/></Border.Effect>
+                <Grid Height="40">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Button Style="{StaticResource Ibtn}" Content="&#xE711;" Click="SelClear_Click" ToolTip="Cancel (Esc)"/>
+                    <TextBlock x:Name="SelCount" Grid.Column="1" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center" Margin="10,0"/>
+                    <Button Grid.Column="2" Style="{StaticResource Chip}" Tag="&#xE8B3;" Content="All" Margin="0,0,6,0" Click="SelAll_Click"/>
+                    <Button Grid.Column="3" Style="{StaticResource Chip}" Tag="&#xEB51;" Content="Favorite" Margin="0,0,6,0" Click="SelFav_Click"/>
+                    <Button Grid.Column="4" Style="{StaticResource Chip}" Tag="&#xE7B3;" Content="Hide" Margin="0,0,6,0" Click="SelHide_Click"/>
+                    <Button Grid.Column="5" Style="{StaticResource Chip}" Tag="&#xE74D;" Content="Delete" Click="SelDelete_Click"/>
+                </Grid>
+            </Border>
+
+            <!-- scroll position bubble -->
+            <Border x:Name="Bubble" Grid.Row="1" Opacity="0" IsHitTestVisible="False" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,110,34,0"
+                    CornerRadius="16" Background="{DynamicResource Panel}" BorderBrush="{DynamicResource W26}" BorderThickness="1" Padding="14,7">
+                <TextBlock x:Name="BubbleText" FontSize="13.5" FontWeight="SemiBold"/>
+            </Border>
+
+            <!-- rename / save-search card -->
+            <Border x:Name="AskCard" Grid.Row="1" Visibility="Collapsed" Opacity="0" VerticalAlignment="Center" HorizontalAlignment="Center" Width="520"
+                    Style="{StaticResource Pop}" Padding="18">
+                <StackPanel>
+                    <TextBlock x:Name="AskTitle" FontSize="17" FontWeight="SemiBold"/>
+                    <Border CornerRadius="12" Background="{DynamicResource Surface}" Padding="12,0" Margin="0,12,0,0">
+                        <TextBox x:Name="AskBox" Height="40" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource Ink}" CaretBrush="{DynamicResource Ink}"
+                                 SelectionBrush="{StaticResource Accent}" VerticalContentAlignment="Center" FontSize="14" KeyDown="AskBox_Key"/>
+                    </Border>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,14,0,0">
+                        <Button Style="{StaticResource Opt}" Click="Ask_Cancel"><TextBlock Text="Cancel"/></Button>
+                        <Button Style="{StaticResource Opt}" Click="Ask_Ok"><TextBlock Text="OK" Foreground="{StaticResource Accent}" FontWeight="SemiBold"/></Button>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- exclude folders card -->
+            <Border x:Name="ExCard" Grid.Row="1" Visibility="Collapsed" Opacity="0" VerticalAlignment="Center" HorizontalAlignment="Center" Width="520"
+                    Style="{StaticResource Pop}" Padding="18">
+                <StackPanel>
+                    <TextBlock Text="Exclude folders" FontSize="17" FontWeight="SemiBold"/>
+                    <TextBlock Text="Any folder whose name contains one of these words is skipped. Separate words with commas." Foreground="{DynamicResource Dim}" Margin="0,4,0,12" FontSize="12" TextWrapping="Wrap"/>
+                    <Border CornerRadius="12" Background="{DynamicResource Surface}" Padding="12,8">
+                        <TextBox x:Name="ExBox" MinHeight="64" TextWrapping="Wrap" AcceptsReturn="False" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource Ink}"
+                                 CaretBrush="{StaticResource Accent}" SelectionBrush="{StaticResource Accent}" FontSize="14" KeyDown="ExBox_Key"/>
+                    </Border>
+                    <TextBlock Text="Suggested from your library" Foreground="{DynamicResource Dim}" FontSize="12" Margin="2,12,0,0"/>
+                    <WrapPanel x:Name="ExSug" Margin="0,2,0,0"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,14,0,0">
+                        <Button Style="{StaticResource Opt}" Click="ExCancel_Click"><TextBlock Text="Cancel"/></Button>
+                        <Button Style="{StaticResource Opt}" Click="ExApply_Click"><TextBlock Text="Apply" Foreground="{StaticResource Accent}" FontWeight="SemiBold"/></Button>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- network stream card -->
+            <Border x:Name="UrlCard" Grid.Row="1" Visibility="Collapsed" Opacity="0" VerticalAlignment="Center" HorizontalAlignment="Center" Width="520"
+                    Style="{StaticResource Pop}" Padding="18" RenderTransformOrigin="0.5,0.5">
+                <Border.RenderTransform><ScaleTransform x:Name="UrlScale" ScaleX="0.94" ScaleY="0.94"/></Border.RenderTransform>
+                <StackPanel>
+                    <TextBlock Text="Play a network stream" FontSize="17" FontWeight="SemiBold"/>
+                    <TextBlock Text="http, https, rtsp, mms, hls (.m3u8) … anything VLC opens" Foreground="{DynamicResource Dim}" Margin="0,4,0,12" FontSize="12"/>
+                    <Border CornerRadius="12" Background="{DynamicResource Surface}" Padding="12,0">
+                        <TextBox x:Name="UrlBox" Height="40" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource Ink}" CaretBrush="{DynamicResource Ink}"
+                                 VerticalContentAlignment="Center" FontSize="14" KeyDown="UrlBox_Key"/>
+                    </Border>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,14,0,0">
+                        <Button Style="{StaticResource Opt}" Click="UrlCancel_Click"><TextBlock Text="Cancel"/></Button>
+                        <Button Style="{StaticResource Opt}" Click="UrlPlay_Click"><TextBlock Text="Play" Foreground="{StaticResource Accent}" FontWeight="SemiBold"/></Button>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <Popup x:Name="SortPop" PlacementTarget="{Binding ElementName=SortBtn}" Placement="Top" StaysOpen="False" AllowsTransparency="True" PopupAnimation="Fade">
+            <Border Style="{StaticResource Pop}" Width="250"><StackPanel x:Name="SortItems"/></Border>
+        </Popup>
+
+        <g:Viewer x:Name="Viewer" Grid.ColumnSpan="2" Visibility="Collapsed"/>
+
+        <!-- toast (above the viewer too) -->
+        <Border x:Name="ToastCard" Grid.Column="1" Visibility="Collapsed" Opacity="0" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,98"
+                CornerRadius="22" Background="{DynamicResource PopBg}" BorderBrush="{DynamicResource W33}" BorderThickness="1" Padding="18,4,6,4">
+            <Border.RenderTransform><TranslateTransform x:Name="ToastT"/></Border.RenderTransform>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock x:Name="ToastText" VerticalAlignment="Center" FontSize="13.5"/>
+                <Button x:Name="ToastBtn" Style="{StaticResource Opt}" Margin="8,0,0,0" Click="Toast_Act">
+                    <TextBlock x:Name="ToastBtnText" Foreground="{StaticResource Accent}" FontWeight="SemiBold"/>
+                </Button>
+            </StackPanel>
+        </Border>
+
+        <!-- keyboard cheat sheet -->
+        <Border x:Name="Cheat" Grid.ColumnSpan="2" Visibility="Collapsed" Opacity="0" Background="#C0050507" MouseLeftButtonUp="Cheat_Close">
+            <Border Style="{StaticResource Pop}" Width="760" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="28,22">
+                <StackPanel>
+                    <TextBlock Text="Shortcuts" FontSize="19" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions>
+                        <TextBlock FontSize="13" LineHeight="23" Foreground="{DynamicResource Dim}" Margin="0,0,16,0" xml:space="preserve">Gallery
+Ctrl+F  search      Ctrl+A  select all
+Ctrl+Z  undo delete      Esc  clear selection
+Ctrl+wheel  tile size      Long-press  select
+Right-click  menu      Middle-click  open in app
+Drop a folder  add it to the library
+Search:  kind:video  ext:png  size&gt;100mb
+date:today|week|month|2024  in:holiday  is:fav</TextBlock>
+                        <TextBlock Grid.Column="1" FontSize="13" LineHeight="23" Foreground="{DynamicResource Dim}" xml:space="preserve">Viewer
+← →  previous / next (video: seek 10s)
+Ctrl+← →  seek 60s      Space  play / pause
+↑ ↓  volume      M  mute      F  fullscreen
+, .  frame step      L  loop A–B      T  save frame
+S  slideshow      [ ]  slideshow speed      H  shuffle
+R  rotate      I  info      + − 0  zoom      W  wallpaper
+Q  mini player      Delete  recycle      Ctrl+C  copy file
+Wheel on video: volume · Shift seek · Ctrl speed · Alt frames
+Double-click: left / right third ±10s, middle fullscreen</TextBlock>
+                    </Grid>
+                    <TextBlock Text="Press Esc or click anywhere to close" FontSize="12" Foreground="{DynamicResource Dim}" Margin="0,14,0,0" HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+        </Border>
+    </Grid>
+</Window>
