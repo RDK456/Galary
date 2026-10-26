@@ -395,11 +395,20 @@ public partial class MainWindow : Window
     }
 
     // ---------- tools menu ----------
+    void Update_Click(object s, RoutedEventArgs e) => _ = Updater.CheckAsync(t => Dispatcher.Invoke(() => Toast(t)));
+
     void Tools_Click(object s, RoutedEventArgs e) { _toolsBtn = (UIElement)s; ToolsMenu(); }
 
     void OpenToolsPopup()
     {
-        SortPop.PlacementTarget = _toolsBtn; SortPop.Placement = System.Windows.Controls.Primitives.PlacementMode.Right;
+        SortPop.PlacementTarget = _toolsBtn; SortPop.Placement = System.Windows.Controls.Primitives.PlacementMode.Custom;
+        SortPop.CustomPopupPlacementCallback = (pop, target, _) =>
+        {
+            // keep the menu inside the window: shift up by however much it overhangs the bottom
+            var y0 = _toolsBtn.TranslatePoint(new Point(0, 0), this).Y;
+            var y = Math.Min(0, ActualHeight - 8 - y0 - pop.Height);
+            return new[] { new System.Windows.Controls.Primitives.CustomPopupPlacement(new Point(target.Width + 4, Math.Max(y, 8 - y0)), System.Windows.Controls.Primitives.PopupPrimaryAxis.Horizontal) };
+        };
         SortPop.IsOpen = true;
     }
 
@@ -410,14 +419,14 @@ public partial class MainWindow : Window
     {
         SortItems.Children.Clear();
         MenuHead("Tools");
-        SortItems.Children.Add(Opt("Find duplicate files", false, FindDupes, false));
-        if (_dup != null) SortItems.Children.Add(Opt("Select extra copies", false, SelectExtras, false));
-        SortItems.Children.Add(Opt("Compact tiles", _lib.S.Compact, () => _lib.S.Compact = !_lib.S.Compact));
-        SortItems.Children.Add(Opt("Theme…", false, () => Dispatcher.BeginInvoke(() => ThemeMenu()), false));
-        SortItems.Children.Add(Opt("Accent color…", false, () => Dispatcher.BeginInvoke(() => AccentMenu()), false));
-        SortItems.Children.Add(Opt("Saved searches…", false, () => Dispatcher.BeginInvoke(() => SearchMenu()), false));
-        SortItems.Children.Add(Opt("Clear thumbnail cache", false, () => Toast($"Freed {Thumbs.ClearDisk() / 1048576.0:0.#} MB"), false));
-        SortItems.Children.Add(Opt("Keyboard shortcuts", false, () => Dispatcher.BeginInvoke(() => ToggleCheat()), false));
+        SortItems.Children.Add(Opt("Find duplicate files", false, FindDupes, false, icon: "\uE90F"));
+        if (_dup != null) SortItems.Children.Add(Opt("Select extra copies", false, SelectExtras, false, icon: "\uE90F"));
+        SortItems.Children.Add(Opt("Compact tiles", _lib.S.Compact, () => _lib.S.Compact = !_lib.S.Compact, true, "\uE90F"));
+        SortItems.Children.Add(Opt("Theme…", false, () => Dispatcher.BeginInvoke(() => ThemeMenu()), false, icon: "\uE90F"));
+        SortItems.Children.Add(Opt("Accent color…", false, () => Dispatcher.BeginInvoke(() => AccentMenu()), false, icon: "\uE90F"));
+        SortItems.Children.Add(Opt("Saved searches…", false, () => Dispatcher.BeginInvoke(() => SearchMenu()), false, icon: "\uE90F"));
+        SortItems.Children.Add(Opt("Clear thumbnail cache", false, () => Toast($"Freed {Thumbs.ClearDisk() / 1048576.0:0.#} MB"), false, icon: "\uE90F"));
+        SortItems.Children.Add(Opt("Keyboard shortcuts", false, () => Dispatcher.BeginInvoke(() => ToggleCheat()), false, icon: "\uE90F"));
         OpenToolsPopup();
     }
 
@@ -967,6 +976,15 @@ public partial class MainWindow : Window
         e.Handled = true;
     }
 
+    // The popup's own window can pick a different DPI than the main window (looked ~2.4x too big); match it.
+    void SortPop_Opened(object? s, EventArgs e)
+    {
+        var src = PresentationSource.FromVisual(SortCard);
+        if (src?.CompositionTarget == null) return;
+        double pop = src.CompositionTarget.TransformToDevice.M11, win = VisualTreeHelper.GetDpi(this).DpiScaleX;
+        SortCard.LayoutTransform = Math.Abs(pop - win) > 0.01 ? new ScaleTransform(win / pop, win / pop) : Transform.Identity;
+    }
+
     void Delete(MediaItem it) => TryDelete(it);
 
     bool TryDelete(MediaItem it)
@@ -1029,12 +1047,12 @@ public partial class MainWindow : Window
         SortPop.IsOpen = true;
     }
 
-    Button Opt(string text, bool on, Action act, bool refresh = true)
+    Button Opt(string text, bool on, Action act, bool refresh = true, string? icon = null)
     {
         var g = new Grid();
         g.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(26) });
         g.ColumnDefinitions.Add(new ColumnDefinition());
-        g.Children.Add(new TextBlock { Text = on ? "" : "", FontFamily = (FontFamily)FindResource("Icons"), FontSize = 13, Foreground = (Brush)FindResource("Accent"), VerticalAlignment = VerticalAlignment.Center });
+        g.Children.Add(new TextBlock { Text = icon ?? (on ? "\uE73E" : ""), FontFamily = (FontFamily)FindResource("Icons"), FontSize = 13, Foreground = (Brush)FindResource("Accent"), VerticalAlignment = VerticalAlignment.Center });
         var t = new TextBlock { Text = text, FontSize = 14 }; Grid.SetColumn(t, 1); g.Children.Add(t);
         var b = new Button { Style = (Style)FindResource("Opt"), Content = g };
         b.Click += (_, _) => { act(); SortPop.IsOpen = false; _lib.SaveSettings(); if (refresh) Refresh(); };

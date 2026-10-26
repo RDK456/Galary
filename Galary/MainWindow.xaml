@@ -200,6 +200,7 @@
                     <Button Style="{StaticResource SideBtn}" Tag="&#xE790;" Content="Background" Click="Bg_Click"/>
                     <Button Style="{StaticResource SideBtn}" Tag="&#xE71C;" Content="Exclude folders…" Click="Ex_Click" ToolTip="Skip folders whose name contains words like cache or thumbnail"/>
                     <Button x:Name="SmartBtn" Style="{StaticResource SideBtn}" Tag="&#xE7B3;" Content="Hide dummy media" Click="Smart_Click" ToolTip="Hides app, game and system media (icons, sprites, UI sounds)"/>
+                    <Button Style="{StaticResource SideBtn}" Tag="&#xE777;" Content="Check for updates" Click="Update_Click" ToolTip="Downloads only what changed since your version"/>
                     <Button Style="{StaticResource SideBtn}" Tag="&#xE90F;" Content="Tools" Click="Tools_Click" ToolTip="Duplicates, accent color, saved searches, shortcuts"/>
                 </StackPanel>
             </Grid>
@@ -341,8 +342,8 @@
             </Border>
         </Grid>
 
-        <Popup x:Name="SortPop" PlacementTarget="{Binding ElementName=SortBtn}" Placement="Top" StaysOpen="False" AllowsTransparency="True" PopupAnimation="Fade">
-            <Border Style="{StaticResource Pop}" Width="250"><StackPanel x:Name="SortItems"/></Border>
+        <Popup x:Name="SortPop" PlacementTarget="{Binding ElementName=SortBtn}" Placement="Top" StaysOpen="False" AllowsTransparency="True" PopupAnimation="Fade" Opened="SortPop_Opened">
+            <Border x:Name="SortCard" Style="{StaticResource Pop}" Width="250"><StackPanel x:Name="SortItems"/></Border>
         </Popup>
 
         <g:Viewer x:Name="Viewer" Grid.ColumnSpan="2" Visibility="Collapsed"/>
